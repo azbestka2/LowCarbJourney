@@ -1,0 +1,206 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  name          String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  profile       UserProfile?
+  preferences   UserPreferences?
+  mealPlans     MealPlan[]
+  progressEntries ProgressEntry[]
+  dailyLogs     DailyLog[]
+}
+
+model UserProfile {
+  id            String    @id @default(cuid())
+  userId        String    @unique
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  gender        String?
+  birthYear     Int?
+  heightCm      Float?
+  weightStart   Float?
+  weightCurrent Float?
+  activityLevel String?   // sedentary, light, moderate, active, very_active
+  bmi           Float?
+  bmr           Float?
+  tdee          Float?
+
+  goal          String?   // lose_weight, maintain, gain_muscle
+  targetWeight  Float?
+  weeklyGoalKg  Float?    // e.g. -0.5
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model UserPreferences {
+  id            String    @id @default(cuid())
+  userId        String    @unique
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  complexityLevel String @default("moderate") // low, moderate, high
+
+  // Macro targets
+  dailyCalories   Int?
+  dailyProtein    Int?
+  dailyFat        Int?
+  dailyCarbs      Int?
+
+  // Dietary restrictions
+  lactoseFree     Boolean @default(false)
+  glutenFree      Boolean @default(false)
+  vegetarian      Boolean @default(false)
+  ketoFriendly    Boolean @default(false)
+
+  // Notifications
+  mealReminders   Boolean @default(true)
+  macroWarnings   Boolean @default(true)
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model ProductCategory {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  icon        String?
+  products    Product[]
+}
+
+model Product {
+  id          String    @id @default(cuid())
+  name        String
+  categoryId  String
+  category    ProductCategory @relation(fields: [categoryId], references: [id])
+
+  caloriesPer100g  Float
+  proteinPer100g   Float
+  fatPer100g       Float
+  carbsPer100g     Float
+
+  userProducts UserProduct[]
+  recipeIngredients RecipeIngredient[]
+}
+
+model UserProduct {
+  id        String  @id @default(cuid())
+  userId    String
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  isExcluded Boolean @default(false)
+
+  @@unique([userId, productId])
+}
+
+model Recipe {
+  id          String    @id @default(cuid())
+  name        String
+  imageUrl    String?
+  description String?
+  mealType    String    // breakfast, lunch, dinner, snack
+  difficulty  String    // easy, medium, hard
+  steps       String    // JSON array of steps
+  ketoTip     String?
+
+  caloriesPerServing  Int
+  proteinPerServing   Float
+  fatPerServing       Float
+  carbsPerServing     Float
+  servingSizeG        Float
+
+  ingredients RecipeIngredient[]
+  mealPlanMeals MealPlanMeal[]
+}
+
+model RecipeIngredient {
+  id          String  @id @default(cuid())
+  recipeId    String
+  recipe      Recipe  @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product @relation(fields: [productId], references: [id])
+
+  amountG     Float
+  amountMl    Float?
+}
+
+model MealPlan {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  startDate   DateTime
+  endDate     DateTime
+  isActive    Boolean   @default(true)
+
+  days        MealPlanDay[]
+  createdAt   DateTime  @default(now())
+}
+
+model MealPlanDay {
+  id          String    @id @default(cuid())
+  mealPlanId  String
+  mealPlan    MealPlan  @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
+
+  date        DateTime
+  dayOfWeek   String
+
+  meals       MealPlanMeal[]
+  summaryCalories  Int     @default(0)
+  summaryProtein   Float   @default(0)
+  summaryFat       Float   @default(0)
+  summaryCarbs     Float   @default(0)
+}
+
+model MealPlanMeal {
+  id              String      @id @default(cuid())
+  mealPlanDayId   String
+  day             MealPlanDay @relation(fields: [mealPlanDayId], references: [id], onDelete: Cascade)
+  recipeId        String
+  recipe          Recipe      @relation(fields: [recipeId], references: [id])
+
+  mealType        String      // breakfast, lunch, dinner, snack
+  sortOrder       Int         @default(0)
+}
+
+model ProgressEntry {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  date        DateTime
+  weight      Float?
+  caloriesEaten Int?
+  notes       String?
+
+  createdAt   DateTime  @default(now())
+}
+
+model DailyLog {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  date        DateTime
+  mealType    String
+  recipeId    String?
+  customName  String?
+  calories    Int?
+  protein     Float?
+  fat         Float?
+  carbs       Float?
+
+  createdAt   DateTime  @default(now())
+}
