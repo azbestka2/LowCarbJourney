@@ -34,18 +34,22 @@ export async function generateWeeklyPlan(
     },
   });
 
-  // If user selected specific products, only use recipes with those products
-  if (selectedIds.length > 0) {
-    allRecipes = allRecipes.filter((recipe) =>
-      recipe.ingredients.every((ing) => selectedIds.includes(ing.productId))
-    );
-  }
-
-  // Also filter out any excluded products (safety net)
+  // Filter out any excluded products
   if (excludedIds.length > 0) {
     allRecipes = allRecipes.filter((recipe) =>
       !recipe.ingredients.some((ing) => excludedIds.includes(ing.productId))
     );
+  }
+
+  // Prefer recipes that only use selected products, but allow others too
+  if (selectedIds.length > 0) {
+    const strictMatches = allRecipes.filter((recipe) =>
+      recipe.ingredients.every((ing) => selectedIds.includes(ing.productId))
+    );
+    // Use strict matches if we have enough, otherwise use all non-excluded
+    if (strictMatches.length >= 4) {
+      allRecipes = strictMatches;
+    }
   }
 
   const complexityLevel = preferences?.complexityLevel || 'moderate';
@@ -253,18 +257,21 @@ export async function swapMeal(mealPlanMealId: string, userId: string) {
     },
   });
 
-  // Only use recipes with selected products
-  if (selectedIds.length > 0) {
-    availableRecipes = availableRecipes.filter((recipe) =>
-      recipe.ingredients.every((ing) => selectedIds.includes(ing.productId))
-    );
-  }
-
-  // Also filter out excluded products
+  // Filter out excluded products
   if (excludedIds.length > 0) {
     availableRecipes = availableRecipes.filter((recipe) =>
       !recipe.ingredients.some((ing) => excludedIds.includes(ing.productId))
     );
+  }
+
+  // Prefer recipes with selected products
+  if (selectedIds.length > 0) {
+    const strictMatches = availableRecipes.filter((recipe) =>
+      recipe.ingredients.every((ing) => selectedIds.includes(ing.productId))
+    );
+    if (strictMatches.length >= 1) {
+      availableRecipes = strictMatches;
+    }
   }
 
   if (availableRecipes.length === 0) {
