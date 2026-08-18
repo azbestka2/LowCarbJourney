@@ -39,6 +39,7 @@ export default function SettingsPage() {
   const [preferences, setPreferences] = useState<Preferences | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [userEmail, setUserEmail] = useState("");
 
   useEffect(() => {
@@ -79,6 +80,7 @@ export default function SettingsPage() {
   const handleSave = async () => {
     if (!profile || !preferences) return;
     setSaving(true);
+    setSaved(false);
     try {
       await fetch("/api/profile", {
         method: "POST",
@@ -91,6 +93,9 @@ export default function SettingsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(preferences),
       });
+
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
     } catch (error) {
       console.error("Error saving:", error);
     } finally {
@@ -182,8 +187,8 @@ export default function SettingsPage() {
           <div className="space-y-4">
             <div>
               <div className="flex justify-between text-sm mb-1">
-                <span className="text-gray-300">Kalorie</span>
-                <span className="text-green-400 font-medium">
+                <span className="text-gray-700">Kalorie</span>
+                <span className="text-green-700 font-medium">
                   {preferences.dailyCalories} kcal
                 </span>
               </div>
@@ -205,8 +210,8 @@ export default function SettingsPage() {
 
             <div>
               <div className="flex justify-between text-sm mb-1">
-                <span className="text-gray-300">Białko</span>
-                <span className="text-purple-400 font-medium">
+                <span className="text-gray-700">Białko</span>
+                <span className="text-purple-700 font-medium">
                   {preferences.dailyProtein} g
                 </span>
               </div>
@@ -228,8 +233,8 @@ export default function SettingsPage() {
 
             <div>
               <div className="flex justify-between text-sm mb-1">
-                <span className="text-gray-300">Tłuszcz</span>
-                <span className="text-yellow-400 font-medium">
+                <span className="text-gray-700">Tłuszcz</span>
+                <span className="text-yellow-700 font-medium">
                   {preferences.dailyFat} g
                 </span>
               </div>
@@ -251,8 +256,8 @@ export default function SettingsPage() {
 
             <div>
               <div className="flex justify-between text-sm mb-1">
-                <span className="text-gray-300">Węglowodany</span>
-                <span className="text-blue-400 font-medium">
+                <span className="text-gray-700">Węglowodany</span>
+                <span className="text-blue-700 font-medium">
                   {preferences.dailyCarbs} g
                 </span>
               </div>
@@ -356,9 +361,13 @@ export default function SettingsPage() {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="btn-green w-full py-3 rounded-xl text-white font-semibold transition-opacity disabled:opacity-50"
+          className={`w-full py-3 rounded-xl font-semibold transition-all ${
+            saved
+              ? "bg-green-500 text-white"
+              : "btn-green text-white"
+          } disabled:opacity-50`}
         >
-          {saving ? "Zapisywanie..." : "Zapisz Zmiany"}
+          {saving ? "Zapisywanie..." : saved ? "Zapisano!" : "Zapisz Zmiany"}
         </button>
 
         <button
