@@ -101,6 +101,8 @@ async function main() {
     // Owoce (dozwolone w małych ilościach)
     prisma.product.upsert({ where: { id: 'p-lemon' }, update: {}, create: { id: 'p-lemon', name: 'Cytryna', categoryId: owoce.id, caloriesPer100g: 29, proteinPer100g: 1.1, fatPer100g: 0.3, carbsPer100g: 9.3 } }),
     prisma.product.upsert({ where: { id: 'p-blueberries' }, update: {}, create: { id: 'p-blueberries', name: 'Jagody', categoryId: owoce.id, caloriesPer100g: 57, proteinPer100g: 0.7, fatPer100g: 0.3, carbsPer100g: 14 } }),
+    prisma.product.upsert({ where: { id: 'p-raspberries' }, update: {}, create: { id: 'p-raspberries', name: 'Maliny', categoryId: owoce.id, caloriesPer100g: 52, proteinPer100g: 1.2, fatPer100g: 0.7, carbsPer100g: 12 } }),
+    prisma.product.upsert({ where: { id: 'p-strawberries' }, update: {}, create: { id: 'p-strawberries', name: 'Truskawki', categoryId: owoce.id, caloriesPer100g: 33, proteinPer100g: 0.7, fatPer100g: 0.3, carbsPer100g: 8 } }),
   ]);
 
   const productMap = Object.fromEntries(products.map((p) => [p.id, p.id]));

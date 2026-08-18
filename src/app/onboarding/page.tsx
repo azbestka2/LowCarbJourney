@@ -346,8 +346,8 @@ export default function OnboardingPage() {
                       className="w-full"
                     />
                     <div className="flex justify-between text-xs text-gray-500 mt-1">
-                      <span>Wolniej (-0.25)</span>
                       <span>Szybciej (-2.0)</span>
+                      <span>Wolniej (-0.25)</span>
                     </div>
                   </div>
                 </>

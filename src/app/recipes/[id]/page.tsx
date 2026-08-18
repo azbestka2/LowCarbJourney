@@ -240,9 +240,7 @@ export default function RecipeDetailPage() {
         </div>
       )}
 
-      <button className="w-full py-4 rounded-xl green-gradient text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all animate-fadeIn animate-delay-400">
-        Dodaj do Jadłospisu
-      </button>
+      {/* Dodaj do Jadłospisu - ukryty */}
     </div>
   );
 }
