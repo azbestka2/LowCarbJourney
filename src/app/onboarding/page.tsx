@@ -94,6 +94,17 @@ export default function OnboardingPage() {
     );
   };
 
+  const allProductIds = categories.flatMap((cat) => cat.products.map((p) => p.id));
+  const allSelected = allProductIds.length > 0 && allProductIds.every((id) => selectedProducts.includes(id));
+
+  const toggleSelectAll = () => {
+    if (allSelected) {
+      setSelectedProducts([]);
+    } else {
+      setSelectedProducts([...allProductIds]);
+    }
+  };
+
   const handleSubmit = async () => {
     setLoading(true);
     setError("");
@@ -166,10 +177,10 @@ export default function OnboardingPage() {
         {/* Progress */}
         <div className="mb-6">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium text-keto-dark">
+            <span className="text-sm font-medium text-gray-900">
               Witaj, {userName || "..."}!
             </span>
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-gray-600">
               Krok {step}/{totalSteps}
             </span>
           </div>
@@ -190,8 +201,8 @@ export default function OnboardingPage() {
         {/* Step 1: Health Data */}
         {step === 1 && (
           <div className="glass-card p-6 animate-fadeIn">
-            <h2 className="text-xl font-bold text-keto-dark mb-1">Twoje dane</h2>
-            <p className="text-sm text-gray-500 mb-6">Potrzebujemy tych informacji, aby obliczyć Twoje zapotrzebowanie</p>
+            <h2 className="text-xl font-bold text-gray-900 mb-1">Twoje dane</h2>
+            <p className="text-sm text-gray-600 mb-6">Potrzebujemy tych informacji, aby obliczyć Twoje zapotrzebowanie</p>
 
             <div className="space-y-4">
               <div>
@@ -279,8 +290,8 @@ export default function OnboardingPage() {
         {/* Step 2: Goal */}
         {step === 2 && (
           <div className="glass-card p-6 animate-fadeIn">
-            <h2 className="text-xl font-bold text-keto-dark mb-1">Twój cel</h2>
-            <p className="text-sm text-gray-500 mb-6">Co chcesz osiągnąć?</p>
+            <h2 className="text-xl font-bold text-gray-900 mb-1">Twój cel</h2>
+            <p className="text-sm text-gray-600 mb-6">Co chcesz osiągnąć?</p>
 
             <div className="space-y-4">
               <div className="space-y-3">
@@ -299,7 +310,7 @@ export default function OnboardingPage() {
                     }`}
                   >
                     <span className="font-semibold">{opt.label}</span>
-                    <p className={`text-xs mt-1 ${goal === opt.value ? "text-green-100" : "text-gray-500"}`}>
+                    <p className={`text-xs mt-1 ${goal === opt.value ? "text-green-100" : "text-gray-600"}`}>
                       {opt.desc}
                     </p>
                   </button>
@@ -334,7 +345,7 @@ export default function OnboardingPage() {
                       onChange={(e) => setWeeklyGoalKg(e.target.value)}
                       className="w-full"
                     />
-                    <div className="flex justify-between text-xs text-gray-400 mt-1">
+                    <div className="flex justify-between text-xs text-gray-500 mt-1">
                       <span>Wolniej (-0.25)</span>
                       <span>Szybciej (-2.0)</span>
                     </div>
@@ -348,14 +359,21 @@ export default function OnboardingPage() {
         {/* Step 3: Products */}
         {step === 3 && (
           <div className="glass-card p-6 animate-fadeIn">
-            <h2 className="text-xl font-bold text-keto-dark mb-1">Wybierz produkty</h2>
-            <p className="text-sm text-gray-500 mb-4">Zaznacz produkty, które chcesz mieć w jadłospisie</p>
-            <p className="text-xs text-gray-400 mb-4">Tip: Kliknij dwukrotnie, aby wykluczyć produkt</p>
+            <h2 className="text-xl font-bold text-gray-900 mb-1">Wybierz produkty</h2>
+            <p className="text-sm text-gray-600 mb-4">Zaznacz produkty, które chcesz mieć w jadłospisie</p>
+            <p className="text-xs text-gray-500 mb-4">Tip: Kliknij dwukrotnie, aby wykluczyć produkt</p>
+
+            <button
+              onClick={toggleSelectAll}
+              className="w-full mb-4 py-2 px-4 rounded-xl text-sm font-semibold border-2 border-green-300 text-green-700 bg-green-50 hover:bg-green-100 transition-all"
+            >
+              {allSelected ? "Odznacz wszystko" : "Zaznacz wszystko"}
+            </button>
 
             <div className="space-y-5 max-h-[50vh] overflow-y-auto pr-2">
               {categories.map((cat) => (
                 <div key={cat.id}>
-                  <h3 className="text-sm font-bold text-keto-dark mb-2 flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-gray-900 mb-2 flex items-center gap-2">
                     <span>{cat.icon}</span> {cat.name}
                   </h3>
                   <div className="flex flex-wrap gap-2">
@@ -375,7 +393,7 @@ export default function OnboardingPage() {
                               ? "bg-red-100 text-red-600 border border-red-300 line-through"
                               : isSelected
                               ? "green-gradient text-white shadow-sm"
-                              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                               : "bg-gray-50 text-gray-800 border border-gray-200 hover:bg-gray-100"
                           }`}
                         >
                           {product.name}
@@ -387,7 +405,7 @@ export default function OnboardingPage() {
               ))}
             </div>
 
-            <div className="mt-4 flex items-center gap-2 text-xs text-gray-500">
+            <div className="mt-4 flex items-center gap-2 text-xs text-gray-600">
               <span className="inline-block w-3 h-3 rounded-full bg-green-500"></span> Wybrane
               <span className="inline-block w-3 h-3 rounded-full bg-red-300 ml-2"></span> Wykluczone
             </div>
@@ -397,13 +415,13 @@ export default function OnboardingPage() {
         {/* Step 4: Preferences */}
         {step === 4 && (
           <div className="glass-card p-6 animate-fadeIn">
-            <h2 className="text-xl font-bold text-keto-dark mb-1">Preferencje</h2>
-            <p className="text-sm text-gray-500 mb-6">Dostosuj dietę do swoich potrzeb</p>
+            <h2 className="text-xl font-bold text-gray-900 mb-1">Preferencje</h2>
+            <p className="text-sm text-gray-600 mb-6">Dostosuj dietę do swoich potrzeb</p>
 
             <div className="space-y-6">
               {/* Complexity */}
               <div>
-                <label className="block text-sm font-bold text-keto-dark mb-2">Poziom skomplikowania</label>
+                <label className="block text-sm font-bold text-gray-900 mb-2">Poziom skomplikowania</label>
                 <div className="space-y-2">
                   {[
                     { value: "low", label: "Niski", desc: "Proste posiłki, te same dania" },
@@ -420,7 +438,7 @@ export default function OnboardingPage() {
                       }`}
                     >
                       <span className="font-semibold text-sm">{opt.label}</span>
-                      <p className={`text-xs ${complexityLevel === opt.value ? "text-green-100" : "text-gray-500"}`}>
+                      <p className={`text-xs ${complexityLevel === opt.value ? "text-green-100" : "text-gray-600"}`}>
                         {opt.desc}
                       </p>
                     </button>
@@ -430,7 +448,7 @@ export default function OnboardingPage() {
 
               {/* Dietary Restrictions */}
               <div>
-                <label className="block text-sm font-bold text-keto-dark mb-2">Ograniczenia żywieniowe</label>
+                <label className="block text-sm font-bold text-gray-900 mb-2">Ograniczenia żywieniowe</label>
                 <div className="space-y-2">
                   {[
                     { key: "lactoseFree", label: "Bez laktozy" },

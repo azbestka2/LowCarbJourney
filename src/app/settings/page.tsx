@@ -105,7 +105,7 @@ export default function SettingsPage() {
 
   if (loading || !profile || !preferences) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-950">
+      <div className="flex flex-col items-center justify-center min-h-screen">
         <div className="w-16 h-16 rounded-full bg-green-500/20 animate-pulse" />
       </div>
     );
@@ -118,7 +118,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 pb-24">
+    <div className="min-h-screen pb-24">
       <div className="green-gradient p-6 pt-12">
         <h1 className="text-2xl font-bold text-white">
           Twoje Cele i Preferencje
@@ -127,7 +127,7 @@ export default function SettingsPage() {
 
       <div className="p-4 space-y-4">
         <div className="glass-card p-4 animate-fadeIn">
-          <h2 className="text-white font-semibold mb-3">Twój Cel:</h2>
+          <h2 className="text-gray-900 font-semibold mb-3">Twój Cel:</h2>
           <div className="space-y-2">
             {(["lose_weight", "maintain", "gain_muscle"] as const).map(
               (goal) => (
@@ -136,7 +136,7 @@ export default function SettingsPage() {
                   className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all ${
                     profile.goal === goal
                       ? "bg-green-600/20 border border-green-500/40"
-                      : "bg-gray-800/50 border border-gray-700/40 hover:border-gray-600/60"
+                      : "bg-gray-100/50 border border-gray-200/40 hover:border-gray-300/60"
                   }`}
                 >
                   <input
@@ -149,7 +149,7 @@ export default function SettingsPage() {
                     }
                     className="accent-green-500"
                   />
-                  <span className="text-white text-sm">{goalLabel[goal]}</span>
+                  <span className="text-gray-900 text-sm">{goalLabel[goal]}</span>
                 </label>
               )
             )}
@@ -157,7 +157,7 @@ export default function SettingsPage() {
         </div>
 
         <div className="glass-card p-4 animate-fadeIn">
-          <h2 className="text-white font-semibold mb-3">Docelowa Waga</h2>
+          <h2 className="text-gray-900 font-semibold mb-3">Docelowa Waga</h2>
           <div className="flex items-center gap-3">
             <input
               type="number"
@@ -168,17 +168,17 @@ export default function SettingsPage() {
                   targetWeight: parseFloat(e.target.value) || 0,
                 })
               }
-              className="flex-1 bg-gray-800 text-white rounded-xl px-4 py-3 border border-gray-700 focus:border-green-500 focus:outline-none"
+              className="flex-1 bg-gray-100 text-gray-900 rounded-xl px-4 py-3 border border-gray-200 focus:border-green-500 focus:outline-none"
             />
-            <span className="text-gray-400 text-sm">kg</span>
+            <span className="text-gray-600 text-sm">kg</span>
           </div>
-          <p className="text-gray-400 text-xs mt-2">
+          <p className="text-gray-600 text-xs mt-2">
             Tempo: {Math.abs(profile.weeklyGoalKg)} kg / tydzień
           </p>
         </div>
 
         <div className="glass-card p-4 animate-fadeIn">
-          <h2 className="text-white font-semibold mb-3">Dzienne Makro:</h2>
+          <h2 className="text-gray-900 font-semibold mb-3">Dzienne Makro:</h2>
           <div className="space-y-4">
             <div>
               <div className="flex justify-between text-sm mb-1">
@@ -275,7 +275,7 @@ export default function SettingsPage() {
         </div>
 
         <div className="glass-card p-4 animate-fadeIn">
-          <h2 className="text-white font-semibold mb-3">
+          <h2 className="text-gray-900 font-semibold mb-3">
             Preferencje Żywieniowe:
           </h2>
           <div className="space-y-2">
@@ -287,9 +287,9 @@ export default function SettingsPage() {
             ].map(({ key, label }) => (
               <label
                 key={key}
-                className="flex items-center justify-between p-3 rounded-xl bg-gray-800/50 border border-gray-700/40 cursor-pointer hover:border-gray-600/60 transition-all"
+                className="flex items-center justify-between p-3 rounded-xl bg-gray-100/50 border border-gray-200/40 cursor-pointer hover:border-gray-300/60 transition-all"
               >
-                <span className="text-white text-sm">{label}</span>
+                <span className="text-gray-900 text-sm">{label}</span>
                 <input
                   type="checkbox"
                   checked={preferences[key]}
@@ -304,7 +304,7 @@ export default function SettingsPage() {
         </div>
 
         <div className="glass-card p-4 animate-fadeIn">
-          <h2 className="text-white font-semibold mb-3">Powiadomienia:</h2>
+          <h2 className="text-gray-900 font-semibold mb-3">Powiadomienia:</h2>
           <div className="space-y-2">
             {[
               {
@@ -318,9 +318,9 @@ export default function SettingsPage() {
             ].map(({ key, label }) => (
               <label
                 key={key}
-                className="flex items-center justify-between p-3 rounded-xl bg-gray-800/50 border border-gray-700/40 cursor-pointer hover:border-gray-600/60 transition-all"
+                className="flex items-center justify-between p-3 rounded-xl bg-gray-100/50 border border-gray-200/40 cursor-pointer hover:border-gray-300/60 transition-all"
               >
-                <span className="text-white text-sm">{label}</span>
+                <span className="text-gray-900 text-sm">{label}</span>
                 <div
                   className={`relative w-11 h-6 rounded-full transition-colors ${
                     preferences[key] ? "bg-green-600" : "bg-gray-600"
@@ -344,12 +344,12 @@ export default function SettingsPage() {
         </div>
 
         <div className="glass-card p-4 animate-fadeIn">
-          <h2 className="text-white font-semibold mb-3">
+          <h2 className="text-gray-900 font-semibold mb-3">
             Informacje o Koncie:
           </h2>
-          <div className="p-3 rounded-xl bg-gray-800/50 border border-gray-700/40">
-            <span className="text-gray-400 text-xs">Email</span>
-            <p className="text-white text-sm mt-0.5">{userEmail}</p>
+          <div className="p-3 rounded-xl bg-gray-100/50 border border-gray-200/40">
+            <span className="text-gray-600 text-xs">Email</span>
+            <p className="text-gray-900 text-sm mt-0.5">{userEmail}</p>
           </div>
         </div>
 

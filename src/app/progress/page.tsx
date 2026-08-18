@@ -41,6 +41,7 @@ export default function ProgressPage() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [newWeight, setNewWeight] = useState<number>(0);
   const [newNotes, setNewNotes] = useState("");
+  const [quickWeight, setQuickWeight] = useState<number>(0);
   const [preferences, setPreferences] = useState<Preferences>({
     targetCalories: 2000,
     targetProtein: 150,
@@ -52,40 +53,57 @@ export default function ProgressPage() {
   const [todayFat, setTodayFat] = useState(0);
   const [todayCarbs, setTodayCarbs] = useState(0);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const authRes = await fetch("/api/auth/me");
-        if (!authRes.ok) {
-          router.push("/login");
-          return;
-        }
-
-        const progressRes = await fetch("/api/progress");
-        if (progressRes.ok) {
-          const data = await progressRes.json();
-          setEntries(data.entries || []);
-          setStats(data.stats || null);
-          setTodayCalories(data.todayCalories || 0);
-          setTodayProtein(data.todayProtein || 0);
-          setTodayFat(data.todayFat || 0);
-          setTodayCarbs(data.todayCarbs || 0);
-        }
-
-        const prefRes = await fetch("/api/preferences");
-        if (prefRes.ok) {
-          const prefData = await prefRes.json();
-          setPreferences(prefData);
-        }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false);
+  const fetchData = async () => {
+    try {
+      const authRes = await fetch("/api/auth/me");
+      if (!authRes.ok) {
+        router.push("/login");
+        return;
       }
-    };
 
+      const progressRes = await fetch("/api/progress");
+      if (progressRes.ok) {
+        const data = await progressRes.json();
+        setEntries(data.entries || []);
+        setStats(data.stats || null);
+        setTodayCalories(data.todayCalories || 0);
+        setTodayProtein(data.todayProtein || 0);
+        setTodayFat(data.todayFat || 0);
+        setTodayCarbs(data.todayCarbs || 0);
+      }
+
+      const prefRes = await fetch("/api/preferences");
+      if (prefRes.ok) {
+        const prefData = await prefRes.json();
+        setPreferences(prefData);
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, [router]);
+
+  const handleQuickSave = async () => {
+    if (!quickWeight) return;
+    try {
+      const res = await fetch("/api/progress", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ weight: quickWeight }),
+      });
+      if (res.ok) {
+        setQuickWeight(0);
+        fetchData();
+      }
+    } catch (error) {
+      console.error("Error saving weight:", error);
+    }
+  };
 
   const handleSave = async () => {
     try {
@@ -99,16 +117,7 @@ export default function ProgressPage() {
         setShowAddForm(false);
         setNewWeight(0);
         setNewNotes("");
-        const progressRes = await fetch("/api/progress");
-        if (progressRes.ok) {
-          const data = await progressRes.json();
-          setEntries(data.entries || []);
-          setStats(data.stats || null);
-          setTodayCalories(data.todayCalories || 0);
-          setTodayProtein(data.todayProtein || 0);
-          setTodayFat(data.todayFat || 0);
-          setTodayCarbs(data.todayCarbs || 0);
-        }
+        fetchData();
       }
     } catch (error) {
       console.error("Error saving progress:", error);
@@ -145,6 +154,27 @@ export default function ProgressPage() {
       </div>
 
       <div className="max-w-md mx-auto p-4 space-y-6">
+        {/* Quick Weight Input */}
+        <div className="bg-white rounded-xl p-4 shadow-sm">
+          <h2 className="text-lg font-semibold text-gray-800 mb-3">Dodaj pomiar wagi</h2>
+          <div className="flex gap-3">
+            <input
+              type="number"
+              step="0.1"
+              placeholder="Waga (kg)"
+              value={quickWeight || ""}
+              onChange={(e) => setQuickWeight(parseFloat(e.target.value) || 0)}
+              className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-green-500 text-gray-800"
+            />
+            <button
+              onClick={handleQuickSave}
+              className="bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-shadow font-medium"
+            >
+              Zapisz wagę
+            </button>
+          </div>
+        </div>
+
         {/* Stats Cards */}
         {stats && (
           <div className="grid grid-cols-2 gap-3">
@@ -316,7 +346,7 @@ export default function ProgressPage() {
                   step="0.1"
                   value={newWeight || ""}
                   onChange={(e) => setNewWeight(parseFloat(e.target.value) || 0)}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-green-500"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-green-500 text-gray-800"
                   placeholder="np. 85.5"
                 />
               </div>
@@ -325,7 +355,7 @@ export default function ProgressPage() {
                 <textarea
                   value={newNotes}
                   onChange={(e) => setNewNotes(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-green-500 h-24 resize-none"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-green-500 h-24 resize-none text-gray-800"
                   placeholder="Opcjonalne notatki..."
                 />
               </div>

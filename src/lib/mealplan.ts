@@ -13,12 +13,18 @@ export async function generateWeeklyPlan(
     where: { userId },
   });
 
-  const excludedProducts = await prisma.userProduct.findMany({
-    where: { userId, isExcluded: true },
-    select: { productId: true },
+  const userProducts = await prisma.userProduct.findMany({
+    where: { userId },
+    select: { productId: true, isExcluded: true },
   });
 
-  const excludedIds = excludedProducts.map((ep) => ep.productId);
+  const selectedIds = userProducts
+    .filter((up) => !up.isExcluded)
+    .map((up) => up.productId);
+
+  const excludedIds = userProducts
+    .filter((up) => up.isExcluded)
+    .map((up) => up.productId);
 
   let allRecipes = await prisma.recipe.findMany({
     include: {
@@ -28,6 +34,14 @@ export async function generateWeeklyPlan(
     },
   });
 
+  // If user selected specific products, only use recipes with those products
+  if (selectedIds.length > 0) {
+    allRecipes = allRecipes.filter((recipe) =>
+      recipe.ingredients.every((ing) => selectedIds.includes(ing.productId))
+    );
+  }
+
+  // Also filter out any excluded products (safety net)
   if (excludedIds.length > 0) {
     allRecipes = allRecipes.filter((recipe) =>
       !recipe.ingredients.some((ing) => excludedIds.includes(ing.productId))
@@ -125,13 +139,16 @@ export async function generateWeeklyPlan(
           selectedRecipe = typeRecipes[Math.floor(Math.random() * typeRecipes.length)];
         }
       } else {
-        const fallbackRecipes = allRecipes.filter(
+        // Try recipes not yet used today, but still matching products
+        const fallbackRecipes = filteredRecipes.filter(
           (r) => r.mealType === mealType && !usedRecipes.includes(r.id)
         );
         selectedRecipe =
           fallbackRecipes.length > 0
             ? fallbackRecipes[Math.floor(Math.random() * fallbackRecipes.length)]
-            : allRecipes[Math.floor(Math.random() * allRecipes.length)];
+            : filteredRecipes.length > 0
+            ? filteredRecipes[Math.floor(Math.random() * filteredRecipes.length)]
+            : null;
       }
 
       if (selectedRecipe) {
@@ -189,7 +206,13 @@ export async function swapMeal(mealPlanMealId: string, userId: string) {
     select: { productId: true },
   });
 
+  const selectedProducts = await prisma.userProduct.findMany({
+    where: { userId, isExcluded: false },
+    select: { productId: true },
+  });
+
   const excludedIds = excludedProducts.map((ep) => ep.productId);
+  const selectedIds = selectedProducts.map((sp) => sp.productId);
 
   let availableRecipes = await prisma.recipe.findMany({
     where: {
@@ -201,6 +224,14 @@ export async function swapMeal(mealPlanMealId: string, userId: string) {
     },
   });
 
+  // Only use recipes with selected products
+  if (selectedIds.length > 0) {
+    availableRecipes = availableRecipes.filter((recipe) =>
+      recipe.ingredients.every((ing) => selectedIds.includes(ing.productId))
+    );
+  }
+
+  // Also filter out excluded products
   if (excludedIds.length > 0) {
     availableRecipes = availableRecipes.filter((recipe) =>
       !recipe.ingredients.some((ing) => excludedIds.includes(ing.productId))

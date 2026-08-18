@@ -61,14 +61,14 @@ export default function RegisterPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h1 className="text-3xl font-bold text-keto-dark">LowCarb</h1>
+          <h1 className="text-3xl font-bold text-gray-900">LowCarb</h1>
           <h2 className="text-xl font-semibold text-green-600">Journey</h2>
-          <p className="text-sm text-gray-500 mt-2">Dołącz do naszej społeczności</p>
+          <p className="text-sm text-gray-600 mt-2">Dołącz do naszej społeczności</p>
         </div>
 
         {/* Register Form */}
         <div className="glass-card p-6">
-          <h3 className="text-lg font-bold text-keto-dark mb-4">Utwórz konto</h3>
+          <h3 className="text-lg font-bold text-gray-900 mb-4">Utwórz konto</h3>
 
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">

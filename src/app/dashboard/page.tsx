@@ -175,7 +175,7 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-950">
+      <div className="flex flex-col items-center justify-center min-h-screen">
         <div className="w-16 h-16 rounded-full bg-green-500/20 animate-pulse" />
       </div>
     );
@@ -221,7 +221,7 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-950 pb-24">
+    <div className="min-h-screen pb-24">
       <div className="green-gradient p-6 pt-12">
         <h1 className="text-2xl font-bold text-white mb-2">
           Witaj, {user.name}!
@@ -243,25 +243,25 @@ export default function DashboardPage() {
 
       <div className="p-4">
         <div className="glass-card p-4 mt-4 animate-fadeIn">
-          <h2 className="text-white font-semibold mb-4">Dzienny bilans</h2>
+          <h2 className="text-green-900 font-semibold mb-4">Dzienny bilans</h2>
           <div className="flex justify-around">
             <div className="nutrition-circle text-center">
-              <div className="text-2xl font-bold text-green-400">
+              <div className="text-2xl font-bold text-green-700">
                 {preferences.dailyCalories}
               </div>
-              <div className="text-gray-400 text-xs">kcal cel</div>
+              <div className="text-gray-600 text-xs">kcal cel</div>
             </div>
             <div className="nutrition-circle text-center">
-              <div className="text-2xl font-bold text-blue-400">
+              <div className="text-2xl font-bold text-blue-700">
                 {preferences.dailyCarbs}g
               </div>
-              <div className="text-gray-400 text-xs">węgle cel</div>
+              <div className="text-gray-600 text-xs">węgle cel</div>
             </div>
             <div className="nutrition-circle text-center">
-              <div className="text-2xl font-bold text-purple-400">
+              <div className="text-2xl font-bold text-purple-700">
                 {preferences.dailyProtein}g
               </div>
-              <div className="text-gray-400 text-xs">białko cel</div>
+              <div className="text-gray-600 text-xs">białko cel</div>
             </div>
           </div>
         </div>
@@ -269,17 +269,17 @@ export default function DashboardPage() {
         {mealPlanDay && (
           <>
             <div className="glass-card p-4 mt-4 animate-fadeIn">
-              <h2 className="text-white font-semibold mb-4">Postęp dzisiaj</h2>
+              <h2 className="text-green-900 font-semibold mb-4">Postęp dzisiaj</h2>
 
               <div className="space-y-3">
                 <div>
-                  <div className="flex justify-between text-xs text-gray-400 mb-1">
+                  <div className="flex justify-between text-xs text-gray-600 mb-1">
                     <span>Kalorie</span>
                     <span>
                       {mealPlanDay.summaryCalories} / {preferences.dailyCalories} kcal
                     </span>
                   </div>
-                  <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+                  <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-green-500 rounded-full transition-all duration-500"
                       style={{ width: `${caloriePercent}%` }}
@@ -288,13 +288,13 @@ export default function DashboardPage() {
                 </div>
 
                 <div>
-                  <div className="flex justify-between text-xs text-gray-400 mb-1">
+                  <div className="flex justify-between text-xs text-gray-600 mb-1">
                     <span>Białko</span>
                     <span>
                       {mealPlanDay.summaryProtein} / {preferences.dailyProtein} g
                     </span>
                   </div>
-                  <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+                  <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-purple-500 rounded-full transition-all duration-500"
                       style={{ width: `${proteinPercent}%` }}
@@ -303,13 +303,13 @@ export default function DashboardPage() {
                 </div>
 
                 <div>
-                  <div className="flex justify-between text-xs text-gray-400 mb-1">
+                  <div className="flex justify-between text-xs text-gray-600 mb-1">
                     <span>Tłuszcze</span>
                     <span>
                       {mealPlanDay.summaryFat} / {preferences.dailyFat} g
                     </span>
                   </div>
-                  <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+                  <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-yellow-500 rounded-full transition-all duration-500"
                       style={{ width: `${fatPercent}%` }}
@@ -318,13 +318,13 @@ export default function DashboardPage() {
                 </div>
 
                 <div>
-                  <div className="flex justify-between text-xs text-gray-400 mb-1">
+                  <div className="flex justify-between text-xs text-gray-600 mb-1">
                     <span>Węglowodany</span>
                     <span>
                       {mealPlanDay.summaryCarbs} / {preferences.dailyCarbs} g
                     </span>
                   </div>
-                  <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+                  <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-blue-500 rounded-full transition-all duration-500"
                       style={{ width: `${carbsPercent}%` }}
@@ -335,7 +335,7 @@ export default function DashboardPage() {
             </div>
 
             <div className="glass-card p-4 mt-4 animate-fadeIn">
-              <h2 className="text-white font-semibold mb-4">Posiłki</h2>
+              <h2 className="text-green-900 font-semibold mb-4">Posiłki</h2>
               <div className="flex gap-2 mb-4 overflow-x-auto">
                 {tabs.map((tab) => (
                   <button
@@ -343,8 +343,8 @@ export default function DashboardPage() {
                     onClick={() => setActiveTab(tab)}
                     className={`day-tab flex items-center gap-1 px-3 py-2 rounded-lg text-sm whitespace-nowrap transition-all ${
                       activeTab === tab
-                        ? "bg-green-600 text-white"
-                        : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+                        ? "bg-green-700 text-white"
+                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                     }`}
                   >
                     <span>{getMealTypeIcon(tab)}</span>
@@ -363,10 +363,10 @@ export default function DashboardPage() {
                     <div key={meal.id} className="meal-card p-4 rounded-xl">
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
-                          <h3 className="text-white font-medium">
+                          <h3 className="text-gray-900 font-medium">
                             {meal.recipe.name}
                           </h3>
-                          <div className="flex gap-4 mt-2 text-xs text-gray-400">
+                          <div className="flex gap-4 mt-2 text-xs text-gray-600">
                             <span>{meal.recipe.caloriesPerServing} kcal</span>
                             <span>{meal.recipe.carbsPerServing}g węgli</span>
                           </div>
@@ -374,7 +374,7 @@ export default function DashboardPage() {
                         <button
                           onClick={() => handleSwapMeal(meal.id)}
                           disabled={swappingMealId === meal.id}
-                          className="text-green-400 text-sm font-medium hover:text-green-300 disabled:opacity-50 transition-colors"
+                          className="text-green-700 text-sm font-medium hover:text-green-900 disabled:opacity-50 transition-colors"
                         >
                           {swappingMealId === meal.id
                             ? "Wymieniam..."
@@ -391,20 +391,20 @@ export default function DashboardPage() {
 
         {!mealPlanDay && (
           <div className="glass-card p-4 mt-4 animate-fadeIn text-center">
-            <p className="text-gray-400 text-sm mb-3">Brak planu żywieniowego na dziś</p>
+            <p className="text-gray-600 text-sm mb-3">Brak planu żywieniowego na dziś</p>
             <p className="text-gray-500 text-xs">Wygeneruj plan w zakładce Jadłospis</p>
           </div>
         )}
 
         <div className="glass-card p-4 mt-4 animate-fadeIn">
-          <h2 className="text-white font-semibold mb-3">Szybkie wskazówki</h2>
+          <h2 className="text-green-900 font-semibold mb-3">Szybkie wskazówki</h2>
           <ul className="space-y-2">
             {tips.map((tip, idx) => (
               <li
                 key={idx}
-                className="flex items-center gap-2 text-gray-300 text-sm"
+                className="flex items-center gap-2 text-gray-700 text-sm"
               >
-                <span className="text-green-400">✓</span>
+                <span className="text-green-700">✓</span>
                 <span>{tip}</span>
               </li>
             ))}
