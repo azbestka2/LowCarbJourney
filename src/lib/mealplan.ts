@@ -59,7 +59,14 @@ export async function generateWeeklyPlan(
     );
   }
 
-  const mealTypes = ['breakfast', 'lunch', 'dinner', 'snack'];
+  const mealTypes = ['breakfast', 'lunch', 'dinner', 'snack'] as const;
+  const mealCalorieRatios: Record<string, number> = {
+    breakfast: 0.25,
+    lunch: 0.35,
+    dinner: 0.30,
+    snack: 0.10,
+  };
+  const targetDailyCalories = preferences?.dailyCalories || 1500;
 
   const existingPlan = await prisma.mealPlan.findFirst({
     where: { userId, isActive: true },
@@ -111,44 +118,66 @@ export async function generateWeeklyPlan(
 
     for (let mealIdx = 0; mealIdx < mealTypes.length; mealIdx++) {
       const mealType = mealTypes[mealIdx];
-      const typeRecipes = filteredRecipes.filter(
+      const targetMealCalories = Math.round(targetDailyCalories * mealCalorieRatios[mealType]);
+      const caloriesRemaining = targetDailyCalories - dayCalories;
+
+      let typeRecipes = filteredRecipes.filter(
         (r) =>
           r.mealType === mealType && !usedRecipes.includes(r.id)
       );
 
-      let selectedRecipe;
-      if (typeRecipes.length > 0) {
-        if (complexityLevel === 'low' && dayOffset > 0) {
-          const prevDay = await prisma.mealPlanDay.findFirst({
-            where: {
-              mealPlanId: mealPlan.id,
-              date: new Date(startDate.getTime() + (dayOffset - 1) * 24 * 60 * 60 * 1000),
-            },
-            include: { meals: true },
-          });
-          if (prevDay) {
-            const prevMeal = prevDay.meals.find((m) => m.mealType === mealType);
-            if (prevMeal) {
-              selectedRecipe = typeRecipes.find((r) => r.id === prevMeal.recipeId);
+      // Low complexity: repeat previous day's meals
+      if (complexityLevel === 'low' && dayOffset > 0) {
+        const prevDay = await prisma.mealPlanDay.findFirst({
+          where: {
+            mealPlanId: mealPlan.id,
+            date: new Date(startDate.getTime() + (dayOffset - 1) * 24 * 60 * 60 * 1000),
+          },
+          include: { meals: true },
+        });
+        if (prevDay) {
+          const prevMeal = prevDay.meals.find((m) => m.mealType === mealType);
+          if (prevMeal) {
+            const repeatRecipe = typeRecipes.find((r) => r.id === prevMeal.recipeId);
+            if (repeatRecipe) {
+              typeRecipes = [repeatRecipe];
             }
           }
-          if (!selectedRecipe) {
-            selectedRecipe = typeRecipes[Math.floor(Math.random() * typeRecipes.length)];
-          }
+        }
+      }
+
+      let selectedRecipe = null;
+
+      if (typeRecipes.length > 0) {
+        // Pick recipe closest to target calories for this meal
+        const lastMeal = mealIdx === mealTypes.length - 1;
+        if (lastMeal && typeRecipes.length > 0) {
+          // Last meal: pick closest to remaining calories
+          selectedRecipe = typeRecipes.reduce((best, curr) => {
+            const bestDiff = Math.abs(best.caloriesPerServing - caloriesRemaining);
+            const currDiff = Math.abs(curr.caloriesPerServing - caloriesRemaining);
+            return currDiff < bestDiff ? curr : best;
+          });
         } else {
-          selectedRecipe = typeRecipes[Math.floor(Math.random() * typeRecipes.length)];
+          // Pick closest to this meal's target calories
+          selectedRecipe = typeRecipes.reduce((best, curr) => {
+            const bestDiff = Math.abs(best.caloriesPerServing - targetMealCalories);
+            const currDiff = Math.abs(curr.caloriesPerServing - targetMealCalories);
+            return currDiff < bestDiff ? curr : best;
+          });
         }
       } else {
-        // Try recipes not yet used today, but still matching products
+        // Fallback: any recipe of this type
         const fallbackRecipes = filteredRecipes.filter(
           (r) => r.mealType === mealType && !usedRecipes.includes(r.id)
         );
-        selectedRecipe =
-          fallbackRecipes.length > 0
-            ? fallbackRecipes[Math.floor(Math.random() * fallbackRecipes.length)]
-            : filteredRecipes.length > 0
-            ? filteredRecipes[Math.floor(Math.random() * filteredRecipes.length)]
-            : null;
+        if (fallbackRecipes.length > 0) {
+          selectedRecipe = fallbackRecipes.reduce((best, curr) => {
+            const bestDiff = Math.abs(best.caloriesPerServing - targetMealCalories);
+            const currDiff = Math.abs(curr.caloriesPerServing - targetMealCalories);
+            return currDiff < bestDiff ? curr : best;
+          });
+        }
       }
 
       if (selectedRecipe) {
@@ -246,12 +275,27 @@ export async function swapMeal(mealPlanMealId: string, userId: string) {
     .filter((m) => m.id !== mealPlanMealId)
     .map((m) => m.recipeId);
 
+  const currentDayTotal = meal.day.meals
+    .filter((m) => m.id !== mealPlanMealId)
+    .reduce((sum, m) => sum + m.recipe.caloriesPerServing, 0);
+
   const unusedRecipes = availableRecipes.filter(
     (r) => !usedInDay.includes(r.id)
   );
 
   const candidates = unusedRecipes.length > 0 ? unusedRecipes : availableRecipes;
-  const newRecipe = candidates[Math.floor(Math.random() * candidates.length)];
+
+  // Get user's target calories
+  const userPrefs = await prisma.userPreferences.findUnique({ where: { userId } });
+  const targetCalories = userPrefs?.dailyCalories || 1500;
+  const caloriesNeeded = targetCalories - currentDayTotal;
+
+  // Pick recipe closest to remaining calories
+  const newRecipe = candidates.reduce((best, curr) => {
+    const bestDiff = Math.abs(best.caloriesPerServing - caloriesNeeded);
+    const currDiff = Math.abs(curr.caloriesPerServing - caloriesNeeded);
+    return currDiff < bestDiff ? curr : best;
+  });
 
   await prisma.mealPlanMeal.update({
     where: { id: mealPlanMealId },

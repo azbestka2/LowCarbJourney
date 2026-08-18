@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine, ResponsiveContainer } from "recharts";
 import BottomNav from "@/components/BottomNav";
 
 interface ProgressEntry {
@@ -75,7 +76,13 @@ export default function ProgressPage() {
       const prefRes = await fetch("/api/preferences");
       if (prefRes.ok) {
         const prefData = await prefRes.json();
-        setPreferences(prefData);
+        const p = prefData.preferences || prefData;
+        setPreferences({
+          targetCalories: p.dailyCalories || 2000,
+          targetProtein: p.dailyProtein || 150,
+          targetFat: p.dailyFat || 70,
+          targetCarbs: p.dailyCarbs || 20,
+        });
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -131,19 +138,6 @@ export default function ProgressPage() {
       </div>
     );
   }
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("pl-PL", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
-  };
-
-  const maxWeight = Math.max(...entries.map((e) => e.weight), stats?.startWeight || 0);
-  const minWeight = Math.min(...entries.map((e) => e.weight), stats?.currentWeight || 0);
-  const weightRange = maxWeight - minWeight || 1;
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -206,24 +200,64 @@ export default function ProgressPage() {
           {entries.length === 0 ? (
             <p className="text-gray-500 text-center py-4">Brak pomiarów</p>
           ) : (
-            <div className="space-y-2">
-              {entries.slice().reverse().map((entry) => {
-                const barWidth = ((entry.weight - minWeight) / weightRange) * 100;
-                return (
-                  <div key={entry.id} className="flex items-center gap-3">
-                    <div className="w-20 text-xs text-gray-500">{formatDate(entry.date)}</div>
-                    <div className="flex-1 bg-gray-100 rounded-full h-4 overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-green-400 to-green-500 rounded-full"
-                        style={{ width: `${Math.max(barWidth, 10)}%` }}
-                      />
-                    </div>
-                    <div className="w-16 text-right text-sm font-medium text-gray-700">
-                      {entry.weight} kg
-                    </div>
-                  </div>
-                );
-              })}
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  data={[...entries].reverse().map((e) => ({
+                    date: new Date(e.date).toLocaleDateString("pl-PL", { day: "2-digit", month: "2-digit" }),
+                    waga: e.weight,
+                    rawDate: e.date,
+                  }))}
+                  margin={{ top: 5, right: 10, left: -10, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fontSize: 11, fill: "#6b7280" }}
+                    angle={-45}
+                    textAnchor="end"
+                    height={50}
+                  />
+                  <YAxis
+                    domain={["dataMin - 2", "dataMax + 2"]}
+                    tick={{ fontSize: 11, fill: "#6b7280" }}
+                    width={45}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "white",
+                      border: "1px solid #e5e7eb",
+                      borderRadius: "8px",
+                      fontSize: "13px",
+                    }}
+                    formatter={(value: number) => [`${value} kg`, "Waga"]}
+                  />
+                  {stats?.targetWeight && (
+                    <ReferenceLine
+                      y={stats.targetWeight}
+                      stroke="#ef4444"
+                      strokeDasharray="5 5"
+                      label={{ value: `Cel: ${stats.targetWeight}kg`, position: "right", fontSize: 11, fill: "#ef4444" }}
+                    />
+                  )}
+                  {stats?.startWeight && (
+                    <ReferenceLine
+                      y={stats.startWeight}
+                      stroke="#9ca3af"
+                      strokeDasharray="3 3"
+                      label={{ value: `Start: ${stats.startWeight}kg`, position: "right", fontSize: 11, fill: "#9ca3af" }}
+                    />
+                  )}
+                  <Line
+                    type="monotone"
+                    dataKey="waga"
+                    stroke="#16a34a"
+                    strokeWidth={3}
+                    dot={{ r: 5, fill: "#16a34a", stroke: "white", strokeWidth: 2 }}
+                    activeDot={{ r: 7, fill: "#16a34a" }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
             </div>
           )}
         </div>
