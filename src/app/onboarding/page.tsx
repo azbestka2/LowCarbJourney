@@ -33,7 +33,7 @@ export default function OnboardingPage() {
   // Step 2 - Goal
   const [goal, setGoal] = useState("lose_weight");
   const [targetWeight, setTargetWeight] = useState("65");
-  const [weeklyGoalKg, setWeeklyGoalKg] = useState("-0.5");
+  const [weeklyGoalKg, setWeeklyGoalKg] = useState("0.5");
 
   // Step 3 - Products
   const [categories, setCategories] = useState<ProductCategory[]>([]);
@@ -122,7 +122,7 @@ export default function OnboardingPage() {
           activityLevel,
           goal,
           targetWeight: goal === "lose_weight" ? parseFloat(targetWeight) : null,
-          weeklyGoalKg: goal === "lose_weight" ? parseFloat(weeklyGoalKg) : null,
+          weeklyGoalKg: goal === "lose_weight" ? -Math.abs(parseFloat(weeklyGoalKg)) : null,
         }),
       });
 
@@ -338,16 +338,16 @@ export default function OnboardingPage() {
                     </label>
                     <input
                       type="range"
-                      min="-2"
-                      max="-0.25"
+                      min="0.25"
+                      max="2"
                       step="0.25"
                       value={weeklyGoalKg}
                       onChange={(e) => setWeeklyGoalKg(e.target.value)}
                       className="w-full"
                     />
                     <div className="flex justify-between text-xs text-gray-500 mt-1">
-                      <span>Szybciej (-2.0)</span>
-                      <span>Wolniej (-0.25)</span>
+                      <span>Wolniej (0.25)</span>
+                      <span>Szybciej (2.0)</span>
                     </div>
                   </div>
                 </>
