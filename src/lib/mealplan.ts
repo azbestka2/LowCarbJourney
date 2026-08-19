@@ -284,7 +284,7 @@ export async function swapMeal(mealPlanMealId: string, userId: string) {
 
   const currentDayTotal = meal.day.meals
     .filter((m) => m.id !== mealPlanMealId)
-    .reduce((sum, m) => sum + m.recipe.caloriesPerServing, 0);
+    .reduce((sum, m) => sum + (m as any).recipe?.caloriesPerServing || 0, 0);
 
   const unusedRecipes = availableRecipes.filter(
     (r) => !usedInDay.includes(r.id)
