@@ -1,5 +1,4 @@
-// trigger deploy2
-// trigger deployhuje
+// trigger deploychuj
 "use client";
 
 import { useEffect } from "react";
